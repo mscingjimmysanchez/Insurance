@@ -1,17 +1,139 @@
-﻿body {
+﻿/* Move down content because we have a fixed navbar that is 50px tall */
+body {
     padding-top: 50px;
     padding-bottom: 20px;
+    color: #0C2340;
+    margin: 0;
 }
 
-/* Set padding to keep content from hitting the edges */
+/* Wrapping element */
+/* Set some basic padding to keep content from hitting the edges */
 .body-content {
     padding-left: 15px;
     padding-right: 15px;
 }
 
-/* Set width on the form input elements since they're 100% wide by default */
+/* Set widths on the form inputs since otherwise they're 100% wide */
 input,
 select,
 textarea {
     max-width: 280px;
+}
+
+
+/* Responsive: Portrait tablets and up */
+@media screen and (min-width: 768px) {
+    .jumbotron {
+        margin-top: 20px;
+    }
+
+    .body-content {
+        padding: 0;
+    }
+}
+
+.navbar-inverse {
+    background-color: #0c2340;
+    border-color: #4B92DB;
+}
+
+    .navbar-inverse .navbar-nav > li > a {
+        color: #4B92DB;
+    }
+
+        .navbar-inverse .navbar-nav > li > a:hover,
+        .navbar-inverse .navbar-nav > li > a:focus {
+            color: #0C2340;
+            background-color: #4B92DB;
+        }
+
+    .navbar-inverse .navbar-brand {
+        color: #4B92DB;
+    }
+
+        .navbar-inverse .navbar-brand:hover,
+        .navbar-inverse .navbar-brand:focus {
+            color: #0C2340;
+            background-color: #4B92DB;
+        }
+
+.dropdown-menu {
+    position: absolute;
+    top: 100%;
+    left: 0;
+    z-index: 1000;
+    display: none;
+    float: left;
+    min-width: 160px;
+    padding: 5px 0;
+    margin: 2px 0 0;
+    font-size: 14px;
+    text-align: left;
+    list-style: none;
+    background-color: #0C2340;
+    color: #4B92DB;
+    background-clip: padding-box;
+    border: 1px solid #ccc;
+    border: 1px solid rgba(0, 0, 0, 0.15);
+    border-radius: 4px;
+    -webkit-box-shadow: 0 6px 12px rgba(0, 0, 0, 0.175);
+    box-shadow: 0 6px 12px rgba(0, 0, 0, 0.175);
+}
+
+    .dropdown-menu > li > a {
+        display: block;
+        padding: 3px 20px;
+        clear: both;
+        font-weight: 400;
+        line-height: 1.42857143;
+        background-color: #0C2340;
+        color: #4B92DB;
+        white-space: nowrap;
+    }
+
+        .dropdown-menu > li > a:hover,
+        .dropdown-menu > li > a:focus {
+            color: #0C2340;
+            text-decoration: none;
+            background-color: #4B92DB;
+        }
+
+.navbar-inverse .navbar-nav > .open > a,
+.navbar-inverse .navbar-nav > .open > a:hover,
+.navbar-inverse .navbar-nav > .open > a:focus {
+    color: #4B92DB;
+    background-color: #0C2340;
+}
+
+.navbar-fixed-bottom {
+    position: fixed;
+    right: 0;
+    left: 0;
+    border-width: 0 0 1px;
+    background-color: #0C2340;
+    border-color: #ffffff;
+    color: #ffffff;
+}
+
+.btn-default {
+    color: #4B92DB;
+    background-color: #0C2340;
+    border-color: #4B92DB;
+}
+
+a {
+    color: #4B92DB;
+    text-decoration: none;
+}
+
+.table-striped > tbody > tr:nth-of-type(odd) {
+    background-color: #537598;
+}
+
+.table > tbody > tr > th {
+    border-top: 1px solid grey;
+}
+
+hr {
+    border-top: 1px solid #0C2340;
 }

@@ -8,6 +8,7 @@ using System.Web;
 using System.Web.Mvc;
 using Insurance.DAL;
 using Insurance.Models;
+using Insurance.ViewModels;
 
 namespace Insurance.Controllers
 {
@@ -39,7 +40,22 @@ namespace Insurance.Controllers
         // GET: Policy/Create
         public ActionResult Create()
         {
-            return View();
+            var coveragesList = db.Coverages.ToList();
+
+            var policyViewModel = new PolicyViewModel
+            {
+                Policy = new Policy { Coverages = new List<Coverage>() },
+                Coverages = new List<SelectListItem>(),
+                SelectedCoverages = new List<int>(),
+            };
+
+            policyViewModel.Coverages = coveragesList.Select(o => new SelectListItem
+            {
+                Text = o.Name,
+                Value = o.ID.ToString()
+            });
+
+            return View(policyViewModel);
         }
 
         // POST: Policy/Create
@@ -47,11 +63,11 @@ namespace Insurance.Controllers
         // más información vea https://go.microsoft.com/fwlink/?LinkId=317598.
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public ActionResult Create([Bind(Include = "ID,Name,Description,ValidityStart,Price,RiskType")] Policy policy)
+        public ActionResult Create([Bind(Include = "ID,Name,Description,ValidityStart,Price,RiskType,Coverages")] PolicyViewModel policy)
         {
             if (ModelState.IsValid)
             {
-                db.Policies.Add(policy);
+                db.Policies.Add(policy.Policy);
                 db.SaveChanges();
                 return RedirectToAction("Index");
             }
@@ -66,12 +82,27 @@ namespace Insurance.Controllers
             {
                 return new HttpStatusCodeResult(HttpStatusCode.BadRequest);
             }
-            Policy policy = db.Policies.Find(id);
-            if (policy == null)
+
+            var policyViewModel = new PolicyViewModel
             {
+                Policy = db.Policies.Include(i => i.Coverages).First(i => i.ID == id),
+            };
+
+            if (policyViewModel.Policy == null)
                 return HttpNotFound();
-            }
-            return View(policy);
+
+            var coveragesList = db.Coverages.ToList();
+
+            policyViewModel.Coverages = coveragesList.Select(o => new SelectListItem
+            {
+                Text = o.Name,
+                Value = o.ID.ToString()
+            });
+
+            ViewBag.Client =
+                    new SelectList(db.Clients, "Id", "Name", policyViewModel.Policy.Client);
+
+            return View(policyViewModel);
         }
 
         // POST: Policy/Edit/5
@@ -79,11 +110,11 @@ namespace Insurance.Controllers
         // más información vea https://go.microsoft.com/fwlink/?LinkId=317598.
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public ActionResult Edit([Bind(Include = "ID,Name,Description,ValidityStart,Price,RiskType")] Policy policy)
+        public ActionResult Edit([Bind(Include = "ID,Name,Description,ValidityStart,Price,RiskType")] PolicyViewModel policy)
         {
             if (ModelState.IsValid)
             {
-                db.Entry(policy).State = EntityState.Modified;
+                db.Entry(policy.Policy).State = EntityState.Modified;
                 db.SaveChanges();
                 return RedirectToAction("Index");
             }
