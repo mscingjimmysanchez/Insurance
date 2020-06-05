@@ -23,5 +23,11 @@ namespace Insurance.ViewModels
             }
             set { _selectedCoverages = value; }
         }
+
+        public PolicyViewModel()
+        {
+            Coverages = new List<SelectListItem>();
+            SelectedCoverages = new List<int>();
+        }
     }
 }

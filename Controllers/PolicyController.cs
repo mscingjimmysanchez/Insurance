@@ -29,33 +29,43 @@ namespace Insurance.Controllers
             {
                 return new HttpStatusCodeResult(HttpStatusCode.BadRequest);
             }
-            Policy policy = db.Policies.Find(id);
-            if (policy == null)
+
+            var policyViewModel = new PolicyViewModel
             {
+                Policy = db.Policies.Include(i => i.Coverages).First(i => i.ID == id),
+            };
+
+            if (policyViewModel.Policy == null)
                 return HttpNotFound();
-            }
-            return View(policy);
+
+            var coveragesList = db.Coverages.ToList();
+
+            policyViewModel.Coverages = coveragesList.Select(o => new SelectListItem
+            {
+                Text = o.Name + " - " + o.Percentage + "% - " + o.Period + " months",
+                Value = o.ID.ToString()
+            });
+
+            ViewBag.ClientID = new SelectList(db.Clients, "ID", "Name", policyViewModel.Policy.Client.ID);
+
+            return View(policyViewModel);
         }
 
         // GET: Policy/Create
         public ActionResult Create()
         {
+            var policyViewModel = new PolicyViewModel();
             var coveragesList = db.Coverages.ToList();
 
-            var policyViewModel = new PolicyViewModel
+            ViewBag.Coverages = coveragesList.Select(o => new SelectListItem
             {
-                Policy = new Policy { Coverages = new List<Coverage>() },
-                Coverages = new List<SelectListItem>(),
-                SelectedCoverages = new List<int>(),
-            };
-
-            policyViewModel.Coverages = coveragesList.Select(o => new SelectListItem
-            {
-                Text = o.Name,
+                Text = o.Name + " - " + o.Percentage + "% - " + o.Period + " months",
                 Value = o.ID.ToString()
             });
 
-            return View(policyViewModel);
+            ViewBag.ClientID = new SelectList(db.Clients, "ID", "Name");
+
+            return View();
         }
 
         // POST: Policy/Create
@@ -63,16 +73,40 @@ namespace Insurance.Controllers
         // más información vea https://go.microsoft.com/fwlink/?LinkId=317598.
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public ActionResult Create([Bind(Include = "ID,Name,Description,ValidityStart,Price,RiskType,Coverages")] PolicyViewModel policy)
+        public ActionResult Create(PolicyViewModel policyViewModel)
         {
             if (ModelState.IsValid)
             {
-                db.Policies.Add(policy.Policy);
+                var policyToAdd = db.Policies.Include(i => i.Coverages).First();
+
+                if (TryUpdateModel(policyToAdd, "Policy", new string[] { "ID", "Name", "Description", "ValidityStart", "Price", "RiskType" }))
+                {
+                    var updatedPolicies = new HashSet<int>(policyViewModel.SelectedCoverages);
+
+                    foreach (Coverage coverage in db.Coverages)
+                    {
+                        if (!updatedPolicies.Contains(coverage.ID))
+                        {
+                            policyToAdd.Coverages.Remove(coverage);
+                        }
+                        else
+                        {
+                            policyToAdd.Coverages.Add((coverage));
+                        }
+                    }
+
+                    policyToAdd.Client = db.Clients.FirstOrDefault(p => p.ID == policyViewModel.Policy.Client.ID);
+                }
+
+                db.Policies.Add(policyToAdd);
                 db.SaveChanges();
+
                 return RedirectToAction("Index");
             }
 
-            return View(policy);
+            ViewBag.ClientID = new SelectList(db.Clients, "ID", "Name");
+
+            return View(policyViewModel);
         }
 
         // GET: Policy/Edit/5
@@ -95,12 +129,13 @@ namespace Insurance.Controllers
 
             policyViewModel.Coverages = coveragesList.Select(o => new SelectListItem
             {
-                Text = o.Name,
+                Text = o.Name + " - " + o.Percentage + "% - " + o.Period + " months",
                 Value = o.ID.ToString()
             });
 
-            ViewBag.Client =
-                    new SelectList(db.Clients, "Id", "Name", policyViewModel.Policy.Client);
+            policyViewModel.SelectedCoverages = null;
+
+            ViewBag.ClientID = new SelectList(db.Clients, "ID", "Name", policyViewModel.Policy.Client.ID);
 
             return View(policyViewModel);
         }
@@ -110,15 +145,37 @@ namespace Insurance.Controllers
         // más información vea https://go.microsoft.com/fwlink/?LinkId=317598.
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public ActionResult Edit([Bind(Include = "ID,Name,Description,ValidityStart,Price,RiskType")] PolicyViewModel policy)
+        public ActionResult Edit(PolicyViewModel policyViewModel)
         {
+            if (policyViewModel == null) return new HttpStatusCodeResult(HttpStatusCode.BadRequest);
+
             if (ModelState.IsValid)
             {
-                db.Entry(policy.Policy).State = EntityState.Modified;
-                db.SaveChanges();
+                var policyToUpdate = db.Policies.Include(i => i.Coverages).First(i => i.ID == policyViewModel.Policy.ID);
+
+                if (TryUpdateModel(policyToUpdate, "Policy", new string[] { "ID", "Name", "Description", "ValidityStart", "Price", "RiskType" }))
+                {
+                    var newCoverages = db.Coverages.Where(m => policyViewModel.SelectedCoverages.Contains(m.ID)).ToList();
+                    var updatedCoverages = new HashSet<int>(policyViewModel.SelectedCoverages);
+                    
+                    foreach (Coverage coverage in db.Coverages)
+                    {
+                        if (!updatedCoverages.Contains(coverage.ID))
+                            policyToUpdate.Coverages.Remove(coverage);
+                        else
+                            policyToUpdate.Coverages.Add((coverage));
+                    }
+
+                    policyToUpdate.Client = db.Clients.FirstOrDefault(p => p.ID == policyViewModel.Policy.Client.ID);
+
+                    db.Entry(policyToUpdate).State = EntityState.Modified;
+                    db.SaveChanges();
+                }
+
                 return RedirectToAction("Index");
             }
-            return View(policy);
+
+            return View(policyViewModel);
         }
 
         // GET: Policy/Delete/5
@@ -128,12 +185,25 @@ namespace Insurance.Controllers
             {
                 return new HttpStatusCodeResult(HttpStatusCode.BadRequest);
             }
-            Policy policy = db.Policies.Find(id);
-            if (policy == null)
+            var policyViewModel = new PolicyViewModel
             {
+                Policy = db.Policies.Include(i => i.Coverages).First(i => i.ID == id),
+            };
+
+            if (policyViewModel.Policy == null)
                 return HttpNotFound();
-            }
-            return View(policy);
+
+            var coveragesList = db.Coverages.ToList();
+
+            policyViewModel.Coverages = coveragesList.Select(o => new SelectListItem
+            {
+                Text = o.Name + " - " + o.Percentage + "% - " + o.Period + " months",
+                Value = o.ID.ToString()
+            });
+
+            ViewBag.ClientID = new SelectList(db.Clients, "ID", "Name", policyViewModel.Policy.Client.ID);
+
+            return View(policyViewModel);
         }
 
         // POST: Policy/Delete/5
@@ -141,7 +211,7 @@ namespace Insurance.Controllers
         [ValidateAntiForgeryToken]
         public ActionResult DeleteConfirmed(int id)
         {
-            Policy policy = db.Policies.Find(id);
+            Policy policy = db.Policies.Include(p => p.Coverages).Include(p => p.Client).SingleOrDefault(p => p.ID == id);
             db.Policies.Remove(policy);
             db.SaveChanges();
             return RedirectToAction("Index");

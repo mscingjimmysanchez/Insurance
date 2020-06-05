@@ -1,4 +1,4 @@
-﻿@model Insurance.Models.Policy
+﻿@model Insurance.ViewModels.PolicyViewModel
 
 @{
     ViewBag.Title = "Delete";
@@ -12,45 +12,63 @@
     <hr />
     <dl class="dl-horizontal">
         <dt>
-            @Html.DisplayNameFor(model => model.Name)
+            @Html.DisplayNameFor(model => model.Policy.Name)
         </dt>
 
         <dd>
-            @Html.DisplayFor(model => model.Name)
+            @Html.DisplayFor(model => model.Policy.Name)
         </dd>
 
         <dt>
-            @Html.DisplayNameFor(model => model.Description)
+            @Html.DisplayNameFor(model => model.Policy.Description)
         </dt>
 
         <dd>
-            @Html.DisplayFor(model => model.Description)
+            @Html.DisplayFor(model => model.Policy.Description)
         </dd>
 
         <dt>
-            @Html.DisplayNameFor(model => model.ValidityStart)
+            @Html.DisplayNameFor(model => model.Policy.Client)
         </dt>
 
         <dd>
-            @Html.DisplayFor(model => model.ValidityStart)
+            @Html.DisplayFor(model => model.Policy.Client.Name)
         </dd>
 
         <dt>
-            @Html.DisplayNameFor(model => model.Price)
+            @Html.DisplayNameFor(model => model.Policy.ValidityStart)
         </dt>
 
         <dd>
-            @Html.DisplayFor(model => model.Price)
+            @Html.DisplayFor(model => model.Policy.ValidityStart)
         </dd>
 
         <dt>
-            @Html.DisplayNameFor(model => model.RiskType)
+            @Html.DisplayNameFor(model => model.Policy.Price)
         </dt>
 
         <dd>
-            @Html.DisplayFor(model => model.RiskType)
+            @Html.DisplayFor(model => model.Policy.Price)
         </dd>
 
+        <dt>
+            @Html.DisplayNameFor(model => model.Policy.RiskType)
+        </dt>
+
+        <dd>
+            @Html.DisplayFor(model => model.Policy.RiskType)
+        </dd>
+        <dt>
+            @Html.DisplayNameFor(model => model.Policy.Coverages)
+        </dt>
+
+        <dd>
+            @foreach (var coverage in Model.Policy.Coverages)
+            {
+                @Html.DisplayName(coverage.Name)
+                @Html.DisplayName(" | ")
+            }
+        </dd>
     </dl>
 
     @using (Html.BeginForm()) {
