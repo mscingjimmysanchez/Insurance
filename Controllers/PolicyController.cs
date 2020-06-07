@@ -77,6 +77,19 @@ namespace Insurance.Controllers
         {
             if (ModelState.IsValid)
             {
+                if (policyViewModel.Policy.RiskType == RiskType.High)
+                {
+                    foreach(var o in policyViewModel.SelectedCoverages)
+                    {
+                        var coverage = db.Coverages.Find(o);
+
+                        if (coverage.Percentage > 50)
+                        {
+                            ModelState.AddModelError("Coverages", "A high risk policy can't have a coverage greater than 50%");
+                        }
+                    }
+                }
+
                 var policyToAdd = db.Policies.Include(i => i.Coverages).First();
 
                 if (TryUpdateModel(policyToAdd, "Policy", new string[] { "ID", "Name", "Description", "ValidityStart", "Price", "RiskType" }))
@@ -103,6 +116,14 @@ namespace Insurance.Controllers
 
                 return RedirectToAction("Index");
             }
+
+            var coveragesList = db.Coverages.ToList();
+
+            ViewBag.Coverages = coveragesList.Select(o => new SelectListItem
+            {
+                Text = o.Name + " - " + o.Percentage + "% - " + o.Period + " months",
+                Value = o.ID.ToString()
+            });
 
             ViewBag.ClientID = new SelectList(db.Clients, "ID", "Name");
 
@@ -174,6 +195,14 @@ namespace Insurance.Controllers
 
                 return RedirectToAction("Index");
             }
+
+            ViewBag.ClientID = new SelectList(db.Clients, "ID", "Name", policyViewModel.Policy.Client.ID);
+            
+            policyViewModel.Coverages = db.Coverages.ToList().Select(o => new SelectListItem
+            {
+                Text = o.Name + " - " + o.Percentage + "% - " + o.Period + " months",
+                Value = o.ID.ToString()
+            });
 
             return View(policyViewModel);
         }

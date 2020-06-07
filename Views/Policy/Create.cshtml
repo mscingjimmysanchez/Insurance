@@ -35,7 +35,7 @@
         @Html.LabelFor(model => model.Policy.Client.ID, "Client", new { @class = "control-label col-md-2" })
         <div class="col-md-10">
             @Html.DropDownListFor(m => m.Policy.Client.ID, (SelectList)ViewBag.ClientID, "", new { @class = "form-control" })
-            @Html.ValidationMessageFor(model => model.Policy.Client.ID)
+            @Html.ValidationMessageFor(model => model.Policy.Client.ID, "", new { @class = "text-danger" })
         </div>
     </div>
 

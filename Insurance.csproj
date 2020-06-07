@@ -179,6 +179,10 @@
     <Compile Include="Migrations\202006030212229_SecondCreate.designer.cs">
       <DependentUpon>202006030212229_SecondCreate.cs</DependentUpon>
     </Compile>
+    <Compile Include="Migrations\202006070132281_ThirdCreate.cs" />
+    <Compile Include="Migrations\202006070132281_ThirdCreate.designer.cs">
+      <DependentUpon>202006070132281_ThirdCreate.cs</DependentUpon>
+    </Compile>
     <Compile Include="Migrations\Configuration.cs" />
     <Compile Include="Models\Client.cs" />
     <Compile Include="Models\Coverage.cs" />
@@ -290,6 +294,9 @@
     </EmbeddedResource>
     <EmbeddedResource Include="Migrations\202006030212229_SecondCreate.resx">
       <DependentUpon>202006030212229_SecondCreate.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Migrations\202006070132281_ThirdCreate.resx">
+      <DependentUpon>202006070132281_ThirdCreate.cs</DependentUpon>
     </EmbeddedResource>
   </ItemGroup>
   <PropertyGroup>
