@@ -34,14 +34,6 @@
     </div>
 
     <div class="form-group">
-        @Html.LabelFor(model => model.Policy.Client.ID, "Client", new { @class = "control-label col-md-2" })
-        <div class="col-md-10">
-            @Html.DropDownListFor(m => m.Policy.Client.ID, (SelectList)ViewBag.ClientID, "", new { @class = "form-control" })
-            @Html.ValidationMessageFor(model => model.Policy.Client.ID, "", new { @class = "text-danger" })
-        </div>
-    </div>
-
-    <div class="form-group">
         @Html.LabelFor(model => model.Policy.ValidityStart, htmlAttributes: new { @class = "control-label col-md-2" })
         <div class="col-md-10">
             @Html.TextBoxFor(model => model.Policy.ValidityStart, "{0:dd/MM/yyyy}", htmlAttributes: new { @class = "form-control" })
@@ -68,13 +60,21 @@
     <div class="form-group">
         @Html.LabelFor(model => model.Coverages, "Coverages", new { @class = "control-label col-md-2" })
         <div class="col-md-10">
-            @Html.ListBoxFor(m => m.SelectedCoverages, Model.Coverages, new { @class = "form-control" })
+            @Html.ListBoxFor(m => m.SelectedCoverages, (IEnumerable<SelectListItem>)ViewBag.Coverages, new { @class = "form-control" })
+            @Html.ValidationMessage("CoveragesError", "", new { @class = "text-danger" })
         </div>
     </div>
 
     <div class="form-group">
         <div class="col-md-offset-2 col-md-10">
             <input type="submit" value="Save" class="btn btn-default" />
+        </div>
+    </div>
+
+    <div class="form-group">
+        <div class="col-md-2"></div>
+        <div class="col-md-10">
+            @Html.ValidationMessage("HighRiskCoveragesError", "", new { @class = "text-danger" })
         </div>
     </div>
 </div>

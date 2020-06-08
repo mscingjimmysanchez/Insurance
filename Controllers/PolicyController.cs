@@ -1,14 +1,12 @@
-﻿using System;
+﻿using Insurance.DAL;
+using Insurance.Models;
+using Insurance.ViewModels;
 using System.Collections.Generic;
 using System.Data;
 using System.Data.Entity;
 using System.Linq;
 using System.Net;
-using System.Web;
 using System.Web.Mvc;
-using Insurance.DAL;
-using Insurance.Models;
-using Insurance.ViewModels;
 
 namespace Insurance.Controllers
 {
@@ -38,16 +36,6 @@ namespace Insurance.Controllers
             if (policyViewModel.Policy == null)
                 return HttpNotFound();
 
-            var coveragesList = db.Coverages.ToList();
-
-            policyViewModel.Coverages = coveragesList.Select(o => new SelectListItem
-            {
-                Text = o.Name + " - " + o.Percentage + "% - " + o.Period + " months",
-                Value = o.ID.ToString()
-            });
-
-            ViewBag.ClientID = new SelectList(db.Clients, "ID", "Name", policyViewModel.Policy.Client.ID);
-
             return View(policyViewModel);
         }
 
@@ -55,13 +43,8 @@ namespace Insurance.Controllers
         public ActionResult Create()
         {
             var policyViewModel = new PolicyViewModel();
-            var coveragesList = db.Coverages.ToList();
 
-            ViewBag.Coverages = coveragesList.Select(o => new SelectListItem
-            {
-                Text = o.Name + " - " + o.Percentage + "% - " + o.Period + " months",
-                Value = o.ID.ToString()
-            });
+            LoadCoverages();
 
             ViewBag.ClientID = new SelectList(db.Clients, "ID", "Name");
 
@@ -77,18 +60,11 @@ namespace Insurance.Controllers
         {
             if (ModelState.IsValid)
             {
-                if (policyViewModel.Policy.RiskType == RiskType.High)
-                {
-                    foreach(var o in policyViewModel.SelectedCoverages)
-                    {
-                        var coverage = db.Coverages.Find(o);
+                if (!ValidateCoverages(policyViewModel))
+                    return View(policyViewModel);
 
-                        if (coverage.Percentage > 50)
-                        {
-                            ModelState.AddModelError("Coverages", "A high risk policy can't have a coverage greater than 50%");
-                        }
-                    }
-                }
+                if (!ValidateHighRiskCoverages(policyViewModel))
+                    return View(policyViewModel);
 
                 var policyToAdd = db.Policies.Include(i => i.Coverages).First();
 
@@ -107,8 +83,6 @@ namespace Insurance.Controllers
                             policyToAdd.Coverages.Add((coverage));
                         }
                     }
-
-                    policyToAdd.Client = db.Clients.FirstOrDefault(p => p.ID == policyViewModel.Policy.Client.ID);
                 }
 
                 db.Policies.Add(policyToAdd);
@@ -117,13 +91,7 @@ namespace Insurance.Controllers
                 return RedirectToAction("Index");
             }
 
-            var coveragesList = db.Coverages.ToList();
-
-            ViewBag.Coverages = coveragesList.Select(o => new SelectListItem
-            {
-                Text = o.Name + " - " + o.Percentage + "% - " + o.Period + " months",
-                Value = o.ID.ToString()
-            });
+            LoadCoverages();
 
             ViewBag.ClientID = new SelectList(db.Clients, "ID", "Name");
 
@@ -146,17 +114,9 @@ namespace Insurance.Controllers
             if (policyViewModel.Policy == null)
                 return HttpNotFound();
 
-            var coveragesList = db.Coverages.ToList();
-
-            policyViewModel.Coverages = coveragesList.Select(o => new SelectListItem
-            {
-                Text = o.Name + " - " + o.Percentage + "% - " + o.Period + " months",
-                Value = o.ID.ToString()
-            });
+            LoadCoverages();
 
             policyViewModel.SelectedCoverages = null;
-
-            ViewBag.ClientID = new SelectList(db.Clients, "ID", "Name", policyViewModel.Policy.Client.ID);
 
             return View(policyViewModel);
         }
@@ -172,6 +132,12 @@ namespace Insurance.Controllers
 
             if (ModelState.IsValid)
             {
+                if (!ValidateCoverages(policyViewModel))
+                    return View(policyViewModel);
+
+                if (!ValidateHighRiskCoverages(policyViewModel))
+                    return View(policyViewModel);
+
                 var policyToUpdate = db.Policies.Include(i => i.Coverages).First(i => i.ID == policyViewModel.Policy.ID);
 
                 if (TryUpdateModel(policyToUpdate, "Policy", new string[] { "ID", "Name", "Description", "ValidityStart", "Price", "RiskType" }))
@@ -187,8 +153,6 @@ namespace Insurance.Controllers
                             policyToUpdate.Coverages.Add((coverage));
                     }
 
-                    policyToUpdate.Client = db.Clients.FirstOrDefault(p => p.ID == policyViewModel.Policy.Client.ID);
-
                     db.Entry(policyToUpdate).State = EntityState.Modified;
                     db.SaveChanges();
                 }
@@ -196,13 +160,7 @@ namespace Insurance.Controllers
                 return RedirectToAction("Index");
             }
 
-            ViewBag.ClientID = new SelectList(db.Clients, "ID", "Name", policyViewModel.Policy.Client.ID);
-            
-            policyViewModel.Coverages = db.Coverages.ToList().Select(o => new SelectListItem
-            {
-                Text = o.Name + " - " + o.Percentage + "% - " + o.Period + " months",
-                Value = o.ID.ToString()
-            });
+            LoadCoverages();
 
             return View(policyViewModel);
         }
@@ -222,16 +180,6 @@ namespace Insurance.Controllers
             if (policyViewModel.Policy == null)
                 return HttpNotFound();
 
-            var coveragesList = db.Coverages.ToList();
-
-            policyViewModel.Coverages = coveragesList.Select(o => new SelectListItem
-            {
-                Text = o.Name + " - " + o.Percentage + "% - " + o.Period + " months",
-                Value = o.ID.ToString()
-            });
-
-            ViewBag.ClientID = new SelectList(db.Clients, "ID", "Name", policyViewModel.Policy.Client.ID);
-
             return View(policyViewModel);
         }
 
@@ -240,10 +188,117 @@ namespace Insurance.Controllers
         [ValidateAntiForgeryToken]
         public ActionResult DeleteConfirmed(int id)
         {
-            Policy policy = db.Policies.Include(p => p.Coverages).Include(p => p.Client).SingleOrDefault(p => p.ID == id);
+            Policy policy = db.Policies.Include(p => p.Coverages).SingleOrDefault(p => p.ID == id);
             db.Policies.Remove(policy);
             db.SaveChanges();
             return RedirectToAction("Index");
+        }
+
+        // GET: Policy/Assign
+        public ActionResult Assign()
+        {
+            var clientPolicyViewModel = new ClientPolicyViewModel();
+
+            ViewBag.ClientID = new SelectList(db.Clients, "ID", "Name");
+
+            return View(clientPolicyViewModel);
+        }
+
+        // POST: Policy/Assign
+        // Para protegerse de ataques de publicación excesiva, habilite las propiedades específicas a las que desea enlazarse. Para obtener 
+        // más información vea https://go.microsoft.com/fwlink/?LinkId=317598.
+        [HttpPost]
+        [ValidateInput(false)]
+        public ActionResult Assign(ClientPolicyViewModel clientPolicyViewModel)
+        {            
+            if (ModelState.IsValid)
+            {
+                return RedirectToAction("AssignPolicies", new { id = clientPolicyViewModel.ClientID });
+            }
+
+            ViewBag.ClientID = clientPolicyViewModel.ClientID;
+
+            return View(clientPolicyViewModel);
+        }
+
+        // GET: Policy/AssignPolicies/5
+        public ActionResult AssignPolicies(int? id)
+        {
+            if (id == null)
+            {
+                return new HttpStatusCodeResult(HttpStatusCode.BadRequest);
+            }
+
+            var clientPolicyViewModel = new ClientPolicyViewModel
+            {
+                Client = db.Clients.SingleOrDefault(p => p.ID == id)
+            };
+
+            foreach (var policy in db.Policies.Include(i => i.Coverages))
+            {
+                var assignPolicyViewModel = new AssignPolicyViewModel()
+                {
+                    ID = policy.ID,
+                    Name = policy.Name,
+                    Description = policy.Description,
+                    ValidityStart = policy.ValidityStart,
+                    Price = policy.Price,
+                    RiskType = policy.RiskType,
+                    Coverages = policy.Coverages,
+                    Assigned = false
+                };
+
+                clientPolicyViewModel.Policies.Add(assignPolicyViewModel);
+            }
+
+            if (clientPolicyViewModel.Client == null)
+                return HttpNotFound();
+
+            ViewBag.ClientID = clientPolicyViewModel.Client.ID;
+
+            return View(clientPolicyViewModel);
+        }
+
+        // POST: Policy/AssignPolicies
+        // Para protegerse de ataques de publicación excesiva, habilite las propiedades específicas a las que desea enlazarse. Para obtener 
+        // más información vea https://go.microsoft.com/fwlink/?LinkId=317598.
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public ActionResult AssignPolicies(ClientPolicyViewModel clientPolicyViewModel)
+        {
+            if (clientPolicyViewModel.Client == null) return new HttpStatusCodeResult(HttpStatusCode.BadRequest);
+
+            if (ModelState.IsValid)
+            {
+                clientPolicyViewModel.ClientID = ViewBag.ClientID;
+
+                var clientToUpdate = db.Clients.Include(i => i.Policies).First(i => i.ID == clientPolicyViewModel.ClientID);
+
+                clientPolicyViewModel.Client = clientToUpdate;
+
+                var selectedPolicies = clientPolicyViewModel.SelectedPolicies;
+
+                foreach (Policy policy in db.Policies)
+                {
+                    if (!selectedPolicies.Contains(policy.ID))
+                    {
+                        clientToUpdate.Policies.Remove(policy);
+                    }
+                    else
+                    {
+                        clientToUpdate.Policies.Add(policy);
+                    }
+                }
+
+                db.Entry(clientToUpdate).State = EntityState.Modified;
+                db.SaveChanges();
+
+                return RedirectToAction("Assign");
+            }
+
+            LoadCoverages();
+
+            return View(clientPolicyViewModel);
         }
 
         protected override void Dispose(bool disposing)
@@ -253,6 +308,49 @@ namespace Insurance.Controllers
                 db.Dispose();
             }
             base.Dispose(disposing);
+        }
+
+        private void LoadCoverages()
+        {
+            ViewBag.Coverages = db.Coverages.ToList().Select(o => new SelectListItem
+            {
+                Text = o.Name + " - " + o.Percentage + "% - " + o.Period + " months",
+                Value = o.ID.ToString()
+            });
+        }
+
+        private bool ValidateCoverages(PolicyViewModel policyViewModel)
+        {
+            if (policyViewModel.SelectedCoverages.Count == 0)
+            {
+                ModelState.AddModelError("CoveragesError", "At least one coverage must be selected");
+                LoadCoverages();
+
+                return false;
+            }
+
+            return true;
+        }
+
+        private bool ValidateHighRiskCoverages(PolicyViewModel policyViewModel)
+        {
+            if (policyViewModel.Policy.RiskType == RiskType.High)
+            {
+                foreach (var o in policyViewModel.SelectedCoverages)
+                {
+                    var coverage = db.Coverages.Find(o);
+
+                    if (coverage.Percentage > 50)
+                    {
+                        ModelState.AddModelError("HighRiskCoveragesError", "A high risk policy can't have a coverage greater than 50%");
+                        LoadCoverages();
+
+                        return false;
+                    }
+                }
+            }
+
+            return true;
         }
     }
 }

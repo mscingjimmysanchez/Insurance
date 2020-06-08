@@ -43,7 +43,7 @@
                     Price = 60000,
                     RiskType = RiskType.Low,
                     Coverages = new List<Coverage>(),
-                    Client = clients.Single(c => c.Name == "Alexander Carson" )
+                    Clients = clients
                 }
             };
             policies.ForEach(c => context.Policies.AddOrUpdate(p => p.Name, c));

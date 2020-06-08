@@ -183,11 +183,17 @@
     <Compile Include="Migrations\202006070132281_ThirdCreate.designer.cs">
       <DependentUpon>202006070132281_ThirdCreate.cs</DependentUpon>
     </Compile>
+    <Compile Include="Migrations\202006071732534_FourthCreate.cs" />
+    <Compile Include="Migrations\202006071732534_FourthCreate.designer.cs">
+      <DependentUpon>202006071732534_FourthCreate.cs</DependentUpon>
+    </Compile>
     <Compile Include="Migrations\Configuration.cs" />
     <Compile Include="Models\Client.cs" />
     <Compile Include="Models\Coverage.cs" />
     <Compile Include="Models\Policy.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="ViewModels\AssignPolicyViewModel.cs" />
+    <Compile Include="ViewModels\ClientPolicyViewModel.cs" />
     <Compile Include="ViewModels\PolicyViewModel.cs" />
   </ItemGroup>
   <ItemGroup>
@@ -255,6 +261,8 @@
     <Content Include="Views\Policy\Details.cshtml" />
     <Content Include="Views\Policy\Edit.cshtml" />
     <Content Include="Views\Policy\Index.cshtml" />
+    <Content Include="Views\Policy\Assign.cshtml" />
+    <Content Include="Views\Policy\AssignPolicies.cshtml" />
   </ItemGroup>
   <ItemGroup>
     <Folder Include="App_Data\" />
@@ -297,6 +305,9 @@
     </EmbeddedResource>
     <EmbeddedResource Include="Migrations\202006070132281_ThirdCreate.resx">
       <DependentUpon>202006070132281_ThirdCreate.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Migrations\202006071732534_FourthCreate.resx">
+      <DependentUpon>202006071732534_FourthCreate.cs</DependentUpon>
     </EmbeddedResource>
   </ItemGroup>
   <PropertyGroup>

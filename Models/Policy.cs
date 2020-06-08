@@ -34,7 +34,7 @@ namespace Insurance.Models
         [Display(Name = "Risk Type")]
         public RiskType RiskType { get; set; }
 
-        public virtual Client Client { get; set; }
+        public virtual ICollection<Client> Clients { get; set; }
 
         public virtual ICollection<Coverage> Coverages { get; set; }
     }
