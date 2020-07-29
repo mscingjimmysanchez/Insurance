@@ -1,0 +1,107 @@
+﻿@model Insurance.ViewModels.ClientPolicyViewModel
+
+@{
+    ViewBag.Title = "Assign Policy";
+}
+
+<h2>Assign Policy</h2>
+
+@using (Html.BeginForm())
+{
+    @Html.AntiForgeryToken()
+
+    <div>
+        <h4>Policy</h4>
+        <hr />
+
+        <dl class="dl-horizontal">
+            <dt>
+                @Html.DisplayNameFor(model => model.Client)
+            </dt>
+
+            <dd>
+                @Html.DisplayFor(model => model.Client.Name)
+            </dd>
+
+            <dt>
+                @Html.DisplayNameFor(model => model.Policies[0].Assigned)
+            </dt>
+
+            <dd>
+                @if (Model.Policies[0].Assigned)
+                {
+                    @String.Format("Yes");
+                }
+                else
+                {
+                    @String.Format("No");
+                }
+            </dd>
+
+            <dt>
+                @Html.DisplayNameFor(model => model.Policies[0].Name)
+            </dt>
+
+            <dd>
+                @Html.DisplayFor(model => model.Policies[0].Name)
+            </dd>
+
+            <dt>
+                @Html.DisplayNameFor(model => model.Policies[0].Description)
+            </dt>
+
+            <dd>
+                @Html.DisplayFor(model => model.Policies[0].Description)
+            </dd>
+
+            <dt>
+                @Html.DisplayNameFor(model => model.Policies[0].ValidityStart)
+            </dt>
+
+            <dd>
+                @Html.DisplayFor(model => model.Policies[0].ValidityStart)
+            </dd>
+
+            <dt>
+                @Html.DisplayNameFor(model => model.Policies[0].Price)
+            </dt>
+
+            <dd>
+                @Html.DisplayFor(model => model.Policies[0].Price)
+            </dd>
+
+            <dt>
+                @Html.DisplayNameFor(model => model.Policies[0].RiskType)
+            </dt>
+
+            <dd>
+                @Html.DisplayFor(model => model.Policies[0].RiskType)
+            </dd>
+
+            <dt>
+                @Html.DisplayNameFor(model => model.Policies[0].Coverages)
+            </dt>
+
+            <dd>
+                @foreach (var coverage in Model.Policies[0].Coverages)
+                {
+                    @Html.DisplayName(coverage.Name)
+                    @Html.DisplayName(" | ")
+                }
+            </dd>
+        </dl>
+    </div>
+
+    <div class="form-group">
+        <div class="col-md-offset-6 col-md-6">
+            @if (Model.Policies[0].Assigned)
+            {
+                <input type="submit" value="Deassign" class="btn btn-default" />
+            }
+            else
+            {
+                <input type="submit" value="Assign" class="btn btn-default" />
+            }
+        </div>
+    </div>
+}

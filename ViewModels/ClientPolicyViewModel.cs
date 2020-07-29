@@ -1,30 +1,31 @@
 ﻿using Insurance.Models;
 using System.Collections.Generic;
-using System.Linq;
-using System.Web.Mvc;
 
 namespace Insurance.ViewModels
 {
+    /// <summary>
+    /// Client policy view model.
+    /// </summary>
     public class ClientPolicyViewModel
     {
+        /// <summary>
+        /// Client ID.
+        /// </summary>
         public int ClientID { get; set; }
+
+        /// <summary>
+        /// Policy client.
+        /// </summary>
         public Client Client { get; set; }
+
+        /// <summary>
+        /// List of assign policy view models.
+        /// </summary>
         public List<AssignPolicyViewModel> Policies { get; set; }
 
-        private List<int> _selectedPolicies;
-        public List<int> SelectedPolicies
-        {
-            get
-            {
-                if (_selectedPolicies == null)
-                {
-                    _selectedPolicies = (from p in Policies where p.Assigned select p.ID).ToList();
-                }
-                return _selectedPolicies;
-            }
-            set { _selectedPolicies = value; }
-        }
-
+        /// <summary>
+        /// Client policy view model.
+        /// </summary>
         public ClientPolicyViewModel()
         {
             Policies = new List<AssignPolicyViewModel>();

@@ -1,26 +1,36 @@
-﻿namespace Insurance.Migrations
-{
-    using Insurance.DAL;
-    using Insurance.Models;
-    using System;
-    using System.Collections.Generic;
-    using System.Data.Entity;
-    using System.Data.Entity.Migrations;
-    using System.Linq;
+﻿using Insurance.DAL;
+using Insurance.Models;
+using System;
+using System.Collections.Generic;
+using System.Data.Entity.Migrations;
+using System.Linq;
 
+namespace Insurance.Migrations
+{
+    /// <summary>
+    /// Configuration class.
+    /// </summary>
     internal sealed class Configuration : DbMigrationsConfiguration<Insurance.DAL.InsuranceContext>
     {
+        /// <summary>
+        /// Configuration class constructor.
+        /// </summary>
         public Configuration()
         {
             AutomaticMigrationsEnabled = false;
         }
 
+        /// <summary>
+        /// Feeds the database.
+        /// </summary>
+        /// <param name="context">Insurance context.</param>
         protected override void Seed(Insurance.DAL.InsuranceContext context)
         {
             var clients = new List<Client>
             {
                 new Client { Name = "Alexander Carson" }
             };
+
             clients.ForEach(c => context.Clients.AddOrUpdate(p => p.Name, c));
             context.SaveChanges();
 
@@ -31,6 +41,7 @@
                 new Coverage {Name = "Theft", Percentage = 40, Period = 6 },
                 new Coverage {Name = "Loss", Percentage = 20, Period = 12 }
             };
+
             coverages.ForEach(c => context.Coverages.AddOrUpdate(p => p.Name, c));
             context.SaveChanges();
 
@@ -46,6 +57,7 @@
                     Clients = clients
                 }
             };
+
             policies.ForEach(c => context.Policies.AddOrUpdate(p => p.Name, c));
             context.SaveChanges();
 
@@ -55,6 +67,12 @@
             context.SaveChanges();
         }
 
+        /// <summary>
+        /// Add or update a coverage to a policy.
+        /// </summary>
+        /// <param name="context">Insurance context.</param>
+        /// <param name="policyName">Policy name.</param>
+        /// <param name="coverageName">Coverage name.</param>
         void AddOrUpdateCoverage(InsuranceContext context, string policyName, string coverageName)
         {
             var pol = context.Policies.SingleOrDefault(p => p.Name == policyName);

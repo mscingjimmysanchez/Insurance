@@ -1,10 +1,15 @@
-﻿namespace Insurance.Migrations
+﻿using System.Data.Entity.Migrations;
+
+namespace Insurance.Migrations
 {
-    using System;
-    using System.Data.Entity.Migrations;
-    
+    /// <summary>
+    /// Initial create migration class.
+    /// </summary>
     public partial class InitialCreate : DbMigration
     {
+        /// <summary>
+        /// Up changes to the database.
+        /// </summary>
         public override void Up()
         {
             CreateTable(
@@ -18,15 +23,15 @@
             
             CreateTable(
                 "dbo.Policy",
-                c => new
+                p => new
                     {
-                        ID = c.Int(nullable: false, identity: true),
-                        Name = c.String(),
-                        Description = c.String(),
-                        ValidityStart = c.DateTime(nullable: false),
-                        Price = c.Double(nullable: false),
-                        RiskType = c.Int(nullable: false),
-                        Client_ID = c.Int(),
+                        ID = p.Int(nullable: false, identity: true),
+                        Name = p.String(),
+                        Description = p.String(),
+                        ValidityStart = p.DateTime(nullable: false),
+                        Price = p.Double(nullable: false),
+                        RiskType = p.Int(nullable: false),
+                        Client_ID = p.Int(),
                     })
                 .PrimaryKey(t => t.ID)
                 .ForeignKey("dbo.Client", t => t.Client_ID)
@@ -58,6 +63,9 @@
             
         }
         
+        /// <summary>
+        /// Down changes to the database.
+        /// </summary>
         public override void Down()
         {
             DropForeignKey("dbo.CoveragePolicy", "Policy_ID", "dbo.Policy");

@@ -166,7 +166,6 @@
     <Compile Include="Controllers\CoverageController.cs" />
     <Compile Include="Controllers\HomeController.cs" />
     <Compile Include="Controllers\PolicyController.cs" />
-    <Compile Include="Controllers\ValuesController.cs" />
     <Compile Include="DAL\InsuranceContext.cs" />
     <Compile Include="Global.asax.cs">
       <DependentUpon>Global.asax</DependentUpon>
@@ -262,7 +261,8 @@
     <Content Include="Views\Policy\Edit.cshtml" />
     <Content Include="Views\Policy\Index.cshtml" />
     <Content Include="Views\Policy\Assign.cshtml" />
-    <Content Include="Views\Policy\AssignPolicies.cshtml" />
+    <Content Include="Views\Policy\AssignPolicy.cshtml" />
+    <Content Include="Views\Policy\ListPolicies.cshtml" />
   </ItemGroup>
   <ItemGroup>
     <Folder Include="App_Data\" />

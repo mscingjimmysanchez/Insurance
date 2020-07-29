@@ -1,10 +1,10 @@
 ﻿@model Insurance.ViewModels.ClientPolicyViewModel
 
 @{
-    ViewBag.Title = "Assign Policies";
+    ViewBag.Title = "Policies List";
 }
 
-<h2>Client Policies</h2>
+<h2>Policies List</h2>
 
 @using (Html.BeginForm())
 {
@@ -47,14 +47,23 @@
                 <th>
                     @Html.DisplayNameFor(model => model.Policies[0].Coverages)
                 </th>
-                <th></th>
+                <th>
+
+                </th>
             </tr>
 
             @foreach (var item in Model.Policies)
             {
                 <tr>
                     <td>
-                        @Html.CheckBoxFor(modelItem => item.Assigned)
+                        @if (item.Assigned)
+                        {
+                            @String.Format("Yes");
+                        }
+                        else
+                        {
+                            @String.Format("No");
+                        }
                     </td>
                     <td>
                         @Html.DisplayFor(modelItem => item.Name)
@@ -63,7 +72,7 @@
                         @Html.DisplayFor(modelItem => item.Description)
                     </td>
                     <td>
-                        @Html.DisplayFor(modelItem => item.ValidityStart, "{0:dd/MM/yyyy}")
+                        @Html.DisplayFor(modelItem => item.ValidityStart)
                     </td>
                     <td>
                         @Html.DisplayFor(modelItem => item.Price)
@@ -78,15 +87,20 @@
                             @Html.DisplayName(" | ")
                         }
                     </td>
+                    <td>
+                        @if (item.Assigned)
+                        {
+                            @Html.ActionLink("Deassign", "AssignPolicy", new { id = item.ID })
+                        }
+                        else
+                        {
+                            @Html.ActionLink("Assign", "AssignPolicy", new { id = item.ID })
+                        }
+                    </td>
                 </tr>
             }
 
         </table>
 
-        <div class="form-group">
-            <div class="col-md-offset-6 col-md-6">
-                <input type="submit" value="Assign" class="btn btn-default" />
-            </div>
-        </div>
     </div>
 }
